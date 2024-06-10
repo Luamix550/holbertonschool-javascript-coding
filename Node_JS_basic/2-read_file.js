@@ -1,38 +1,57 @@
 const fs = require('fs');
 
-function countStudents(path) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) {
-        reject(new Error('Cannot load the database'));
-        return;
+function Person(data) {
+  const [firstname, lastname, age, field] = data.split(',');
+  this.firstname = ` ${firstname}`;
+  this.lastname = lastname;
+  this.age = age;
+  this.field = field;
+}
+
+function getPersons(persons) {
+  const personObj = [];
+  if (Array.isArray(persons)) {
+    persons.shift();
+    persons.map((p) => personObj.push(new Person(p)));
+  }
+  return personObj;
+}
+
+function getInfo(personObj, field, condition) {
+  let total = 0;
+  const names = [];
+  if (Array.isArray(personObj)) {
+    personObj.forEach((p) => {
+      if (p[field] === condition) {
+        total += 1;
+        names.push(p.firstname);
       }
-
-      const lines = data.split('\n').filter(line => line.trim() !== '');
-
-      const fieldCounts = {};
-
-      lines.forEach(line => {
-        const [name, age, field] = line.split(',');
-
-        if (fieldCounts[field]) {
-          fieldCounts[field].count++;
-          fieldCounts[field].students.push(name);
-        } else {
-          fieldCounts[field] = { count: 1, students: [name] };
-        }
-      });
-
-      const totalStudents = lines.length;
-
-      const results = {
-        totalStudents,
-        fieldCounts,
-      };
-
-      resolve(results);
     });
-  });
+  }
+  return {
+    total,
+    names,
+  };
+}
+
+function stats(persons) {
+  const personObj = getPersons(persons);
+  const cs = getInfo(personObj, 'field', 'CS');
+  const swe = getInfo(personObj, 'field', 'SWE');
+
+  console.log(`Number of students: ${personObj.length}`);
+  console.log(`Number of students in CS: ${cs.total}. List:${cs.names.join(',')}`);
+  console.log(`Number of students in SWE: ${swe.total}. List:${swe.names.join(',')}`);
+}
+
+function countStudents(filePath) {
+  if (!fs.existsSync(filePath)) {
+    throw new Error('Cannot load the database');
+  } else {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const persons = content.split('\n').filter((line) => line.trim() !== '');
+    stats(persons);
+  }
 }
 
 module.exports = countStudents;
