@@ -1,3 +1,4 @@
+/* eslint-disable */
 const http = require('http');
 
 const args = process.argv.slice(2);
@@ -30,7 +31,7 @@ const app = http.createServer(async (req, res) => {
 });
 
 app.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+  //   console.log(`Server running at http://${hostname}:${port}/`);
 });
 
 module.exports = app;
